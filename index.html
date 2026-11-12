@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scholars Meet – Participant Details</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root { --green:#0f6b4f; --bg:#f4f7f5; --card:#fff; --text:#1d2b25; --muted:#66756e; --line:#d9e2dd; --err:#b3261e; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Noto Sans Malayalam',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+  header { background:var(--green); color:#fff; padding:28px 16px; text-align:center; }
+  header h1 { margin:0 0 4px; font-size:1.5rem; }
+  header p { margin:0; opacity:.9; font-size:.95rem; }
+  main { max-width:760px; margin:0 auto; padding:16px; }
+  .card { border:1px solid var(--line); background:var(--card); border-radius:12px; margin:0 0 16px; padding:18px 18px 6px; }
+  .field { margin-bottom:14px; }
+  label { display:block; font-weight:600; margin-bottom:4px; }
+  label small { display:block; font-weight:400; color:var(--muted); font-size:.82rem; }
+  input { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font:inherit; background:#fff; }
+  input:focus { outline:2px solid var(--green); border-color:transparent; }
+  .req { color:var(--err); }
+  button { width:100%; padding:14px; border:0; border-radius:10px; background:var(--green); color:#fff; font:inherit; font-weight:700; font-size:1.05rem; cursor:pointer; }
+  button:disabled { opacity:.6; cursor:wait; }
+  #msg { margin:12px 0; padding:12px 14px; border-radius:8px; display:none; }
+  #msg.err { display:block; background:#fdecea; color:var(--err); }
+  #thanks { display:none; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:32px 20px; text-align:center; }
+  #thanks h2 { color:var(--green); margin-top:0; }
+  .hp { position:absolute; left:-9999px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>പങ്കെടുക്കുന്നവരുടെ വിവരങ്ങൾ</h1>
+  <p>Scholars Meet · Participant Details</p>
+</header>
+
+<main>
+  <div id="thanks">
+    <h2>جزاكم الله خيراً</h2>
+    <p>വിവരങ്ങൾ സ്വീകരിച്ചു. നന്ദി.<br><small>Your details have been submitted. Thank you.</small></p>
+  </div>
+
+  <form id="form" novalidate>
+    <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <div class="card">
+      <div class="field">
+        <label for="full_name">പേര് <span class="req">*</span><small>Full name</small></label>
+        <input id="full_name" name="full_name" type="text" required>
+      </div>
+      <div class="field">
+        <label for="mobile">മൊബൈൽ നമ്പർ <span class="req">*</span><small>Mobile number</small></label>
+        <input id="mobile" name="mobile" type="tel" inputmode="tel" required>
+      </div>
+      <div class="field">
+        <label for="zone">സോൺ / ജില്ല<small>Zone / District</small></label>
+        <input id="zone" name="zone" type="text">
+      </div>
+      <div class="field">
+        <label for="unit">യൂണിറ്റ്<small>Unit</small></label>
+        <input id="unit" name="unit" type="text">
+      </div>
+    </div>
+    <div id="msg"></div>
+    <button type="submit" id="submitBtn">സമർപ്പിക്കുക · Submit</button>
+  </form>
+</main>
+
+<script>
+/* ============ 1. PUT YOUR SUPABASE DETAILS HERE ============ */
+const SUPABASE_URL  = 'https://vpgvxhqzuypjjhihqhmv.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwZ3Z4aHF6dXlwampoaWhxaG12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQxMTU3NzYsImV4cCI6MjEwOTY5MTc3Nn0.SniaUet5RfGFR6Oa_8sPyXXVN6Nxianeu68b1CCT9f8';
+/* ============================================================ */
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const form = document.getElementById('form');
+const msg = document.getElementById('msg');
+const btn = document.getElementById('submitBtn');
+
+function showError(t) { msg.className = 'err'; msg.textContent = t; msg.scrollIntoView({behavior:'smooth', block:'center'}); }
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  msg.className = ''; msg.style.display = 'none';
+  if (form.website.value) return;                       // honeypot
+
+  const row = {
+    full_name: form.full_name.value.trim(),
+    mobile:    form.mobile.value.trim(),
+    zone:      form.zone.value.trim() || null,
+    unit:      form.unit.value.trim() || null,
+  };
+  if (row.full_name.length < 2) { form.full_name.focus(); return showError('പേര് നൽകുക · Please enter your name.'); }
+  if (row.mobile.length < 6)    { form.mobile.focus();    return showError('മൊബൈൽ നമ്പർ നൽകുക · Please enter your mobile number.'); }
+
+  btn.disabled = true; btn.textContent = 'അയക്കുന്നു… · Submitting…';
+  const { error } = await db.from('participant_details').insert(row);
+  if (error) {
+    console.error(error);
+    btn.disabled = false; btn.textContent = 'സമർപ്പിക്കുക · Submit';
+    return showError('സമർപ്പിക്കാൻ കഴിഞ്ഞില്ല. വീണ്ടും ശ്രമിക്കുക · Could not submit, please try again.');
+  }
+  form.style.display = 'none';
+  document.getElementById('thanks').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>
