@@ -19,8 +19,8 @@
   .field { margin-bottom:14px; }
   label { display:block; font-weight:600; margin-bottom:4px; }
   label small { display:block; font-weight:400; color:var(--muted); font-size:.82rem; }
-  input { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font:inherit; background:#fff; }
-  input:focus { outline:2px solid var(--green); border-color:transparent; }
+  input, select { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font:inherit; background:#fff; }
+  input:focus, select:focus { outline:2px solid var(--green); border-color:transparent; }
   .req { color:var(--err); }
   button { width:100%; padding:14px; border:0; border-radius:10px; background:var(--green); color:#fff; font:inherit; font-weight:700; font-size:1.05rem; cursor:pointer; }
   button:disabled { opacity:.6; cursor:wait; }
@@ -62,6 +62,48 @@
         <label for="unit">യൂണിറ്റ്<small>Unit</small></label>
         <input id="unit" name="unit" type="text">
       </div>
+      <div class="field">
+        <label for="has_own_house">സ്വന്തമായി വീടുണ്ടോ?<small>Do you own a house?</small></label>
+        <select id="has_own_house" name="has_own_house">
+          <option value="">— തിരഞ്ഞെടുക്കുക · Select —</option>
+          <option value="yes">ഉണ്ട് · Yes</option>
+          <option value="no">ഇല്ല · No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="parents_status">മാതാപിതാക്കൾ ജീവിച്ചിരിപ്പുണ്ടോ<small>Are your parents alive?</small></label>
+        <select id="parents_status" name="parents_status">
+          <option value="">— തിരഞ്ഞെടുക്കുക · Select —</option>
+          <option value="both">രണ്ടു പേരും · Both</option>
+          <option value="mother">ഉമ്മ മാത്രം · Mother only</option>
+          <option value="father">ഉപ്പ മാത്രം · Father only</option>
+          <option value="none">ആരുമില്ല · Neither</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="has_health_issues">ആരോഗ്യ പ്രയാസങ്ങൾ ഉളളവരുണ്ടോ<small>Anyone with health problems (in your family)?</small></label>
+        <select id="has_health_issues" name="has_health_issues">
+          <option value="">— തിരഞ്ഞെടുക്കുക · Select —</option>
+          <option value="yes">ഉണ്ട് · Yes</option>
+          <option value="no">ഇല്ല · No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="has_regular_medication">സ്ഥിരമായി മരുന്ന് കഴിക്കുന്നവരുണ്ടോ<small>Anyone on regular medication?</small></label>
+        <select id="has_regular_medication" name="has_regular_medication">
+          <option value="">— തിരഞ്ഞെടുക്കുക · Select —</option>
+          <option value="yes">ഉണ്ട് · Yes</option>
+          <option value="no">ഇല്ല · No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="has_financial_burden">പ്രയാസകരമായ സാമ്പത്തിക ബാധ്യതകൾ ഉണ്ടോ<small>Do you have serious financial liabilities?</small></label>
+        <select id="has_financial_burden" name="has_financial_burden">
+          <option value="">— തിരഞ്ഞെടുക്കുക · Select —</option>
+          <option value="yes">ഉണ്ട് · Yes</option>
+          <option value="no">ഇല്ല · No</option>
+        </select>
+      </div>
     </div>
     <div id="msg"></div>
     <button type="submit" id="submitBtn">സമർപ്പിക്കുക · Submit</button>
@@ -79,6 +121,8 @@ const form = document.getElementById('form');
 const msg = document.getElementById('msg');
 const btn = document.getElementById('submitBtn');
 
+const yn = v => v === '' ? null : v === 'yes';
+
 function showError(t) { msg.className = 'err'; msg.textContent = t; msg.scrollIntoView({behavior:'smooth', block:'center'}); }
 
 form.addEventListener('submit', async (e) => {
@@ -91,6 +135,11 @@ form.addEventListener('submit', async (e) => {
     mobile:    form.mobile.value.trim(),
     zone:      form.zone.value.trim() || null,
     unit:      form.unit.value.trim() || null,
+    has_own_house:          yn(form.has_own_house.value),
+    parents_status:         form.parents_status.value || null,
+    has_health_issues:      yn(form.has_health_issues.value),
+    has_regular_medication: yn(form.has_regular_medication.value),
+    has_financial_burden:   yn(form.has_financial_burden.value),
   };
   if (row.full_name.length < 2) { form.full_name.focus(); return showError('പേര് നൽകുക · Please enter your name.'); }
   if (row.mobile.length < 6)    { form.mobile.focus();    return showError('മൊബൈൽ നമ്പർ നൽകുക · Please enter your mobile number.'); }
@@ -109,3 +158,4 @@ form.addEventListener('submit', async (e) => {
 </script>
 </body>
 </html>
+
